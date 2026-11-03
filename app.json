@@ -34,6 +34,14 @@
     "scheme": "bookshelf",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "741844ad-ce39-424a-97af-d81bef17f136"
+      }
     }
   }
 }
