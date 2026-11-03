@@ -6,7 +6,7 @@ const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Borde
 const studentCode = process.argv[2] || 'QE190108';
 const fullName = process.argv[3] || 'Nguyễn Lê Thái Bảo';
 const githubUrl = process.argv[4] || 'https://github.com/thai-baokin/PE_Exam_MMA';
-const expoUrl = process.argv[5] || 'https://expo.dev/accounts/thaibao123/projects/bookshelf-app';
+const expoUrl = process.argv[5] || 'https://expo.dev/accounts/thaibao123/projects/bookshelf-app/builds/51753b4c-8cb3-4949-a83a-b2118d0b1d5f';
 const projectId = process.argv[6] || 'pe-exam123';
 const testEmail = process.argv[7] || 'grader.qe190108@example.com';
 const testPassword = process.argv[8] || 'Test1234!';
