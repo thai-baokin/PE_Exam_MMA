@@ -34,8 +34,11 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email.trim(), password);
-      // Immediately sign out so the user stays on this screen to see and capture the success message!
-      await signOut(auth);
+      try {
+        await signOut(auth);
+      } catch (signErr) {
+        // ignore
+      }
       setSuccess(true);
       setEmail('');
       setPassword('');
