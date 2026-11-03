@@ -25,18 +25,18 @@ export function AppInput({ label, error, testID, ...rest }: AppInputProps) {
 
 const styles = StyleSheet.create({
   container: { marginBottom: 14 },
-  label: { fontSize: 14, fontWeight: '500', marginBottom: 4, color: Colors.text },
+  label: { fontSize: 13, fontWeight: '600', marginBottom: 6, color: Colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5 },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
     fontSize: 15,
     color: Colors.text,
-    backgroundColor: '#fff',
-    minHeight: 44,
+    backgroundColor: '#FFFFFF',
+    minHeight: 46,
   },
-  inputError: { borderColor: Colors.danger },
-  errorText: { color: Colors.danger, fontSize: 12, marginTop: 4 },
+  inputError: { borderColor: Colors.danger, backgroundColor: '#FFF5F5' },
+  errorText: { color: Colors.danger, fontSize: 12, marginTop: 4, fontWeight: '500' },
 });

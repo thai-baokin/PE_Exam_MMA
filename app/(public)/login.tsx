@@ -59,7 +59,7 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to your BookShelf</Text>
+            <Text style={styles.subtitle}>Sign in to your CineList</Text>
           </View>
 
           {authError ? (

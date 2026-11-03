@@ -1,24 +1,29 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Books collection - users can only access their own books
-    match /books/{bookId} {
-      // Only authenticated users can read their own books
+    // Movies collection - users can only access their own movies
+    match /movies/{movieId} {
+      // Only authenticated users can read their own movies
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       
       // Create: must be authenticated, userId must match, all required fields validated
       allow create: if request.auth != null
         && request.resource.data.userId == request.auth.uid
-        && isValidBook(request.resource.data);
+        && isValidMovie(request.resource.data);
       
-      // Update: must be authenticated, own book, valid data, userId cannot change
+      // Update: must be authenticated, own movie, valid data, userId cannot change
       allow update: if request.auth != null
         && resource.data.userId == request.auth.uid
         && request.resource.data.userId == request.auth.uid
-        && isValidBook(request.resource.data);
+        && isValidMovie(request.resource.data);
       
-      // Delete: must be authenticated and own the book
+      // Delete: must be authenticated and own the movie
       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Fallback for books collection
+    match /books/{bookId} {
+      allow read, write: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
     }
     
     // Deny everything else
@@ -27,9 +32,9 @@ service cloud.firestore {
     }
   }
   
-  function isValidBook(data) {
+  function isValidMovie(data) {
     return isValidTitle(data.title)
-      && isValidAuthor(data.author)
+      && isValidDirector(data.director)
       && isValidGenre(data.genre)
       && isValidStatus(data.status)
       && isValidRating(data)
@@ -42,18 +47,18 @@ service cloud.firestore {
       && title.size() <= 100;
   }
   
-  function isValidAuthor(author) {
-    return author is string
-      && author.matches('.*[^ \\t\\r\\n].*')
-      && author.size() <= 60;
+  function isValidDirector(director) {
+    return director is string
+      && director.matches('.*[^ \\t\\r\\n].*')
+      && director.size() <= 60;
   }
   
   function isValidGenre(genre) {
-    return genre in ['Fiction', 'Non-Fiction', 'Academic', 'Other'];
+    return genre in ['Action', 'Comedy', 'Drama', 'Horror'];
   }
   
   function isValidStatus(status) {
-    return status in ['To Read', 'Reading', 'Finished'];
+    return status in ['Plan to Watch', 'Watching', 'Watched'];
   }
   
   function isValidRating(data) {

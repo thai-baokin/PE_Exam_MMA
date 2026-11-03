@@ -10,65 +10,66 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useBooks } from '@/context/BooksContext';
-import { validateBookForm } from '@/utils/validation';
+import { useMovies } from '@/context/MoviesContext';
+import { validateMovieForm } from '@/utils/validation';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppPicker } from '@/components/ui/AppPicker';
 import { AppButton } from '@/components/ui/AppButton';
-import { Colors } from '@/constants/Colors';
-import { BookFormData, BookFormErrors, Genre, Status } from '@/types';
+import { Colors, Shadows3D } from '@/constants/Colors';
+import { MovieFormData, MovieFormErrors, Genre, Status } from '@/types';
 
 const GENRE_OPTIONS = [
   { label: 'Choose genre', value: '' },
-  { label: 'Fiction', value: 'Fiction' },
-  { label: 'Non-Fiction', value: 'Non-Fiction' },
-  { label: 'Academic', value: 'Academic' },
-  { label: 'Other', value: 'Other' },
+  { label: 'Action', value: 'Action' },
+  { label: 'Comedy', value: 'Comedy' },
+  { label: 'Drama', value: 'Drama' },
+  { label: 'Horror', value: 'Horror' },
 ];
 
 const STATUS_OPTIONS = [
   { label: 'Choose status', value: '' },
-  { label: 'To Read', value: 'To Read' },
-  { label: 'Reading', value: 'Reading' },
-  { label: 'Finished', value: 'Finished' },
+  { label: 'Plan to Watch', value: 'Plan to Watch' },
+  { label: 'Watching', value: 'Watching' },
+  { label: 'Watched', value: 'Watched' },
 ];
 
 export default function DetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { books, updateBook, deleteBook, toggleFavorite } = useBooks();
-  const book = books.find((b) => b.id === id);
+  const { movies, updateMovie, deleteMovie, toggleFavorite } = useMovies();
+  const movie = movies.find((m) => m.id === id);
 
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState<BookFormData>({
+  const [form, setForm] = useState<MovieFormData>({
     title: '',
-    author: '',
+    director: '',
     genre: '',
     status: '',
     rating: '',
     notes: '',
   });
-  const [errors, setErrors] = useState<BookFormErrors>({});
+  const [errors, setErrors] = useState<MovieFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (book) {
+    if (movie) {
       setForm({
-        title: book.title,
-        author: book.author,
-        genre: book.genre,
-        status: book.status,
-        rating: book.rating != null ? String(book.rating) : '',
-        notes: book.notes || '',
+        title: movie.title,
+        director: movie.director,
+        genre: movie.genre,
+        status: movie.status,
+        rating: movie.rating != null ? String(movie.rating) : '',
+        notes: movie.notes || '',
       });
     }
-  }, [book]);
+  }, [movie]);
 
-  if (!book) {
+  if (!movie) {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.notFound}>
-          <Text style={styles.notFoundText}>Book not found.</Text>
+          <Text style={{ fontSize: 36, marginBottom: 8 }}>🎞️</Text>
+          <Text style={styles.notFoundText}>Movie not found.</Text>
           <AppButton
             title="← Back to List"
             onPress={() => router.replace('/(protected)/list')}
@@ -80,30 +81,30 @@ export default function DetailScreen() {
     );
   }
 
-  const handleFormChange = (field: keyof BookFormData, val: string) => {
+  const handleFormChange = (field: keyof MovieFormData, val: string) => {
     const updated = { ...form, [field]: val };
     setForm(updated);
     if (submitted) {
-      setErrors(validateBookForm(updated));
+      setErrors(validateMovieForm(updated));
     }
   };
 
   const handleSave = async () => {
     setSubmitted(true);
-    const e = validateBookForm(form);
+    const e = validateMovieForm(form);
     setErrors(e);
     if (Object.keys(e).length > 0) return;
 
     setSaving(true);
     try {
-      await updateBook(book.id, form);
+      await updateMovie(movie.id, form);
       setEditing(false);
       setSubmitted(false);
     } catch (err: any) {
       if (Platform.OS === 'web') {
-        window.alert(err.message || 'Failed to update book');
+        window.alert(err.message || 'Failed to update movie');
       } else {
-        Alert.alert('Error', err.message || 'Failed to update book');
+        Alert.alert('Error', err.message || 'Failed to update movie');
       }
     } finally {
       setSaving(false);
@@ -112,12 +113,12 @@ export default function DetailScreen() {
 
   const handleCancelEdit = () => {
     setForm({
-      title: book.title,
-      author: book.author,
-      genre: book.genre,
-      status: book.status,
-      rating: book.rating != null ? String(book.rating) : '',
-      notes: book.notes || '',
+      title: movie.title,
+      director: movie.director,
+      genre: movie.genre,
+      status: movie.status,
+      rating: movie.rating != null ? String(movie.rating) : '',
+      notes: movie.notes || '',
     });
     setErrors({});
     setSubmitted(false);
@@ -126,26 +127,26 @@ export default function DetailScreen() {
 
   const executeDelete = async () => {
     try {
-      await deleteBook(book.id);
+      await deleteMovie(movie.id);
       router.replace('/(protected)/list');
     } catch (err: any) {
       if (Platform.OS === 'web') {
-        window.alert(err.message || 'Failed to delete book');
+        window.alert(err.message || 'Failed to delete movie');
       } else {
-        Alert.alert('Error', err.message || 'Failed to delete book');
+        Alert.alert('Error', err.message || 'Failed to delete movie');
       }
     }
   };
 
   const handleDelete = () => {
     if (Platform.OS === 'web') {
-      if (window.confirm(`Are you sure you want to delete "${book.title}"?`)) {
+      if (window.confirm(`Are you sure you want to delete "${movie.title}"?`)) {
         executeDelete();
       }
     } else {
       Alert.alert(
-        'Delete Book',
-        `Are you sure you want to delete "${book.title}"?`,
+        'Delete Movie',
+        `Are you sure you want to delete "${movie.title}"?`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
@@ -158,17 +159,16 @@ export default function DetailScreen() {
     }
   };
 
-  const stars = Array.from({ length: 5 }, (_, i) => (
-    <Text
-      key={i}
-      style={[
-        styles.star,
-        i < (book.rating ?? 0) ? styles.starFilled : styles.starEmpty,
-      ]}
-    >
-      ★
-    </Text>
-  ));
+  const getStatusColor = (st: Status) => {
+    switch (st) {
+      case 'Plan to Watch': return { bg: '#FEF3C7', text: '#D97706' };
+      case 'Watching': return { bg: '#DBEAFE', text: '#2563EB' };
+      case 'Watched': return { bg: '#D1FAE5', text: '#059669' };
+      default: return { bg: '#F1F5F9', text: '#64748B' };
+    }
+  };
+
+  const stCol = getStatusColor(movie.status);
 
   return (
     <SafeAreaView style={styles.safe} testID="detail-screen">
@@ -178,7 +178,7 @@ export default function DetailScreen() {
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
-          {editing ? 'Edit Book' : 'Book Details'}
+          {editing ? 'Edit Movie' : 'Movie Details'}
         </Text>
         <View style={{ width: 60 }} />
       </View>
@@ -190,102 +190,102 @@ export default function DetailScreen() {
       >
         {!editing ? (
           /* ── View Mode ── */
-          <View style={styles.card}>
+          <View style={[styles.card, Shadows3D.card]}>
             <View style={styles.titleRow}>
-              <Text testID="detail-title" style={styles.bookTitle}>
-                {book.title}
-              </Text>
+              <View style={{ flex: 1, marginRight: 10 }}>
+                <Text testID="detail-title" style={styles.movieTitle}>
+                  {movie.title}
+                </Text>
+                <Text style={styles.movieDirector}>🎬 Directed by {movie.director}</Text>
+              </View>
               <TouchableOpacity
-                onPress={() => toggleFavorite(book.id, book.favorite)}
+                onPress={() => toggleFavorite(movie.id, movie.favorite)}
                 style={styles.starBtn}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                testID="btn-favorite-toggle"
+                activeOpacity={0.7}
               >
-                <Text style={[styles.favStar, book.favorite && styles.favStarActive]}>
-                  ★
+                <Text style={[styles.star, movie.favorite && styles.starActive]}>
+                  {movie.favorite ? '★' : '☆'}
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text testID="detail-author" style={styles.bookAuthor}>
-              by {book.author}
-            </Text>
 
-            <View style={styles.divider} />
-
-            <View style={styles.metaGrid}>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Genre</Text>
-                <Text style={styles.metaValue}>{book.genre}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Status</Text>
-                <Text style={styles.metaValue}>{book.status}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Rating</Text>
-                <Text style={styles.metaValue}>
-                  {book.rating != null ? `${book.rating} / 5` : 'Not rated'}
+            <View style={styles.badgeRow}>
+              <View style={[styles.badge, { backgroundColor: Colors.primaryLight }]}>
+                <Text style={[styles.badgeText, { color: Colors.primary }]}>
+                  {movie.genre}
                 </Text>
               </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Favorite</Text>
-                <Text style={styles.metaValue}>
-                  {book.favorite ? '⭐ Yes' : 'No'}
+              <View style={[styles.badge, { backgroundColor: stCol.bg }]}>
+                <Text style={[styles.badgeText, { color: stCol.text }]}>
+                  {movie.status}
                 </Text>
               </View>
             </View>
 
-            {book.rating != null && (
-              <View style={styles.ratingBox}>
-                <Text style={styles.metaLabel}>Rating Stars</Text>
-                <View style={styles.starsRow}>{stars}</View>
-              </View>
-            )}
-
-            {book.notes ? (
-              <View style={styles.notesBox}>
-                <Text style={styles.metaLabel}>Notes</Text>
-                <Text testID="detail-notes" style={styles.notesText}>
-                  {book.notes}
+            {/* Info Grid */}
+            <View style={styles.infoSection}>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Rating</Text>
+                <Text style={styles.infoValue}>
+                  {movie.rating != null ? `★ ${movie.rating} / 5` : 'Not rated'}
                 </Text>
               </View>
-            ) : null}
 
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Favorite</Text>
+                <Text style={[styles.infoValue, { color: movie.favorite ? Colors.star : Colors.textMuted }]}>
+                  {movie.favorite ? '★ In Favorites' : 'No'}
+                </Text>
+              </View>
+
+              <View style={[styles.infoItem, { borderBottomWidth: 0 }]}>
+                <Text style={styles.infoLabel}>Notes</Text>
+                <Text style={[styles.infoValue, !movie.notes && styles.italic]}>
+                  {movie.notes || 'No notes added'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
             <View style={styles.actions}>
               <AppButton
-                title="✏️ Edit"
+                title="✏️ Edit Movie"
                 onPress={() => setEditing(true)}
-                style={{ flex: 1 }}
+                variant="primary"
                 testID="btn-edit"
               />
               <AppButton
-                title="🗑️ Delete"
+                title="🗑️ Delete Movie"
                 onPress={handleDelete}
                 variant="danger"
-                style={{ flex: 1 }}
+                style={{ marginTop: 10 }}
                 testID="btn-delete"
               />
             </View>
           </View>
         ) : (
           /* ── Edit Mode ── */
-          <View style={styles.card}>
-            <Text style={styles.editTitle}>Edit Book</Text>
+          <View style={[styles.card, Shadows3D.card]}>
+            <View style={styles.sectionHeaderLine}>
+              <View style={styles.indicatorBar} />
+              <Text style={styles.editCardTitle}>Edit Movie Details</Text>
+            </View>
+
             <AppInput
               label="Title"
               value={form.title}
               onChangeText={(v) => handleFormChange('title', v)}
               error={submitted ? errors.title : undefined}
-              placeholder="Book title"
+              placeholder="Movie title"
               testID="input-title"
             />
             <AppInput
-              label="Author"
-              value={form.author}
-              onChangeText={(v) => handleFormChange('author', v)}
-              error={submitted ? errors.author : undefined}
-              placeholder="Author name"
-              testID="input-author"
+              label="Director"
+              value={form.director}
+              onChangeText={(v) => handleFormChange('director', v)}
+              error={submitted ? errors.director : undefined}
+              placeholder="Director name"
+              testID="input-director"
             />
             <AppPicker
               label="Genre"
@@ -293,6 +293,7 @@ export default function DetailScreen() {
               value={form.genre}
               onChange={(v) => handleFormChange('genre', v)}
               error={submitted ? errors.genre : undefined}
+              placeholder="Choose genre"
               testID="picker-genre"
             />
             <AppPicker
@@ -301,6 +302,7 @@ export default function DetailScreen() {
               value={form.status}
               onChange={(v) => handleFormChange('status', v)}
               error={submitted ? errors.status : undefined}
+              placeholder="Choose status"
               testID="picker-status"
             />
             <AppInput
@@ -319,24 +321,22 @@ export default function DetailScreen() {
               error={submitted ? errors.notes : undefined}
               multiline
               numberOfLines={3}
-              placeholder="Any notes..."
+              placeholder="Any notes about this movie..."
               testID="input-notes"
-              style={{ textAlignVertical: 'top', minHeight: 80 }}
             />
 
-            <View style={styles.actions}>
+            <View style={styles.editActions}>
               <AppButton
-                title="Save"
+                title="💾 Save Changes"
                 onPress={handleSave}
                 loading={saving}
-                style={{ flex: 1 }}
                 testID="btn-save"
               />
               <AppButton
                 title="Cancel"
                 onPress={handleCancelEdit}
                 variant="outline"
-                style={{ flex: 1 }}
+                style={{ marginTop: 10 }}
                 testID="btn-cancel"
               />
             </View>
@@ -359,88 +359,62 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  backBtn: { padding: 4 },
-  backText: { fontSize: 15, color: Colors.primary, fontWeight: '600' },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.text,
-    flex: 1,
-    textAlign: 'center',
-  },
-  content: { padding: 16, paddingBottom: 40 },
+  backBtn: { paddingVertical: 6, paddingHorizontal: 8 },
+  backText: { color: Colors.primary, fontSize: 15, fontWeight: '700' },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: Colors.text },
+  content: { padding: 18, paddingBottom: 48 },
   card: {
     backgroundColor: Colors.card,
-    borderRadius: 12,
+    borderRadius: 18,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  editTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: 12,
   },
-  bookTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: Colors.text,
-    flex: 1,
-    marginRight: 8,
+  movieTitle: { fontSize: 22, fontWeight: '900', color: Colors.text, marginBottom: 4, letterSpacing: -0.5 },
+  movieDirector: { fontSize: 14, color: Colors.textSecondary, fontWeight: '600' },
+  starBtn: { padding: 6 },
+  star: { fontSize: 32, color: '#CBD5E1' },
+  starActive: { color: Colors.star },
+  badgeRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  badge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
+  badgeText: { fontSize: 12, fontWeight: '700' },
+  infoSection: {
+    backgroundColor: Colors.background,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  bookAuthor: { fontSize: 15, color: Colors.textMuted, marginBottom: 16 },
-  starBtn: { padding: 4 },
-  favStar: { fontSize: 28, color: Colors.border },
-  favStarActive: { color: Colors.star },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginBottom: 16,
+  infoItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
-  metaGrid: {
+  infoLabel: { fontSize: 11, fontWeight: '800', color: Colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 },
+  infoValue: { fontSize: 15, color: Colors.text, fontWeight: '600' },
+  italic: { fontStyle: 'italic', color: Colors.textMuted, fontWeight: 'normal' },
+  actions: { gap: 4 },
+  sectionHeaderLine: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-    marginBottom: 16,
-  },
-  metaItem: { minWidth: '45%', flex: 1 },
-  metaLabel: {
-    fontSize: 11,
-    color: Colors.textMuted,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 3,
-  },
-  metaValue: { fontSize: 15, color: Colors.text, fontWeight: '600' },
-  ratingBox: { marginBottom: 16 },
-  starsRow: { flexDirection: 'row', marginTop: 4 },
-  star: { fontSize: 24, marginRight: 2 },
-  starFilled: { color: Colors.star },
-  starEmpty: { color: Colors.border },
-  notesBox: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: 14,
-    marginBottom: 16,
-  },
-  notesText: { fontSize: 14, color: Colors.text, lineHeight: 22, marginTop: 4 },
-  actions: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  notFound: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    marginBottom: 18,
+    gap: 8,
   },
-  notFoundText: { fontSize: 16, color: Colors.textMuted, marginBottom: 16 },
+  indicatorBar: {
+    width: 4,
+    height: 18,
+    borderRadius: 2,
+    backgroundColor: Colors.primary,
+  },
+  editCardTitle: { fontSize: 18, fontWeight: '800', color: Colors.text },
+  editActions: { marginTop: 12 },
+  notFound: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
+  notFoundText: { fontSize: 18, color: Colors.textMuted, fontWeight: '600' },
 });

@@ -1,4 +1,4 @@
-import { BookFormData, BookFormErrors } from '@/types';
+import { MovieFormData, MovieFormErrors } from '@/types';
 
 export interface AuthErrors {
   email?: string;
@@ -43,8 +43,8 @@ export function validateRegisterForm(
   return errors;
 }
 
-export function validateBookForm(data: BookFormData): BookFormErrors {
-  const errors: BookFormErrors = {};
+export function validateMovieForm(data: MovieFormData): MovieFormErrors {
+  const errors: MovieFormErrors = {};
 
   if (!data.title.trim()) {
     errors.title = 'Title is required';
@@ -52,10 +52,10 @@ export function validateBookForm(data: BookFormData): BookFormErrors {
     errors.title = 'Title must be at most 100 characters';
   }
 
-  if (!data.author.trim()) {
-    errors.author = 'Author is required';
-  } else if (data.author.length > 60) {
-    errors.author = 'Author must be at most 60 characters';
+  if (!data.director.trim()) {
+    errors.director = 'Director is required';
+  } else if (data.director.length > 60) {
+    errors.director = 'Director must be at most 60 characters';
   }
 
   if (!data.genre) {
@@ -66,16 +66,18 @@ export function validateBookForm(data: BookFormData): BookFormErrors {
     errors.status = 'Please choose a status';
   }
 
-  if (data.rating.trim() !== '') {
-    const r = Number(data.rating);
+  if (data.rating !== undefined && data.rating !== null && data.rating.trim() !== '') {
+    const r = Number(data.rating.trim());
     if (!Number.isInteger(r) || r < 0 || r > 5) {
       errors.rating = 'Rating must be a whole number from 0 to 5';
     }
   }
 
-  if (data.notes.length > 300) {
+  if (data.notes && data.notes.length > 300) {
     errors.notes = 'Notes must be at most 300 characters';
   }
 
   return errors;
 }
+
+export const validateBookForm = validateMovieForm;

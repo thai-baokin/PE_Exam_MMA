@@ -69,7 +69,7 @@ export default function RegisterScreen() {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join BookShelf today</Text>
+            <Text style={styles.subtitle}>Join CineList today</Text>
           </View>
 
           {success && (
