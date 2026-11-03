@@ -14,6 +14,7 @@
         "buildType": "apk"
       },
       "env": {
+        "EAS_NO_FROZEN_LOCKFILE": "1",
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyAP6HzxK5O4MvD_259Po58UEgnVm55Ujg4",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "pe-exam123.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "pe-exam123",
