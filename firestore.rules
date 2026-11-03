@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Books collection - users can only access their own books
+    match /books/{bookId} {
+      // Only authenticated users can read their own books
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Create: must be authenticated, userId must match, all required fields validated
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && isValidBook(request.resource.data);
+      
+      // Update: must be authenticated, own book, valid data, userId cannot change
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && isValidBook(request.resource.data);
+      
+      // Delete: must be authenticated and own the book
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+  
+  function isValidBook(data) {
+    return isValidTitle(data.title)
+      && isValidAuthor(data.author)
+      && isValidGenre(data.genre)
+      && isValidStatus(data.status)
+      && isValidRating(data)
+      && isValidNotes(data);
+  }
+  
+  function isValidTitle(title) {
+    return title is string
+      && title.matches('.*[^ \\t\\r\\n].*')
+      && title.size() <= 100;
+  }
+  
+  function isValidAuthor(author) {
+    return author is string
+      && author.matches('.*[^ \\t\\r\\n].*')
+      && author.size() <= 60;
+  }
+  
+  function isValidGenre(genre) {
+    return genre in ['Fiction', 'Non-Fiction', 'Academic', 'Other'];
+  }
+  
+  function isValidStatus(status) {
+    return status in ['To Read', 'Reading', 'Finished'];
+  }
+  
+  function isValidRating(data) {
+    return !('rating' in data)
+      || data.rating == null
+      || (data.rating is int && data.rating >= 0 && data.rating <= 5);
+  }
+  
+  function isValidNotes(data) {
+    return !('notes' in data)
+      || data.notes == null
+      || (data.notes is string && data.notes.size() <= 300);
+  }
+}
