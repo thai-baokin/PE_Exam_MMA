@@ -72,7 +72,6 @@ export default function ListScreen() {
       setErrors({});
       setFormSubmitted(false);
       setMovieSuccess(true);
-      setTimeout(() => setMovieSuccess(false), 3000);
     } catch (err: any) {
       setMovieError(err.message || 'Failed to add movie');
     } finally {
@@ -164,8 +163,19 @@ export default function ListScreen() {
           </View>
 
           {movieSuccess && (
-            <View testID="movie-success" style={styles.successBox}>
-              <Text style={styles.successText}>Movie added</Text>
+            <View testID="movie-success" style={[styles.successBox, Shadows3D.card]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontSize: 22 }}>✅</Text>
+                  <Text style={styles.successText}>Movie added</Text>
+                </View>
+                <TouchableOpacity onPress={() => setMovieSuccess(false)} style={{ padding: 4 }}>
+                  <Text style={{ color: '#16A34A', fontWeight: 'bold', fontSize: 18 }}>✕</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={{ color: '#15803D', fontSize: 13, marginTop: 4 }}>
+                The movie was successfully saved to Firestore and added to your watchlist below.
+              </Text>
             </View>
           )}
           {movieError ? (
@@ -394,8 +404,8 @@ const styles = StyleSheet.create({
     color: Colors.text,
     letterSpacing: -0.3,
   },
-  successBox: { backgroundColor: '#DCFCE7', borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: '#86EFAC' },
-  successText: { color: '#16A34A', fontWeight: '700', textAlign: 'center' },
+  successBox: { backgroundColor: '#DCFCE7', borderRadius: 12, padding: 14, marginBottom: 16, borderWidth: 1.5, borderColor: '#86EFAC' },
+  successText: { color: '#16A34A', fontWeight: '800', fontSize: 17 },
   errorBox: { backgroundColor: '#FEE2E2', borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: '#FCA5A5' },
   errorText: { color: Colors.danger, fontWeight: '600' },
   filterHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },

@@ -5,8 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
-  Platform,
+  Modal,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,6 +38,8 @@ export default function DetailScreen() {
   const movie = movies.find((m) => m.id === id);
 
   const [editing, setEditing] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [detailError, setDetailError] = useState('');
   const [form, setForm] = useState<MovieFormData>({
     title: '',
     director: '',
@@ -50,6 +51,7 @@ export default function DetailScreen() {
   const [errors, setErrors] = useState<MovieFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (movie) {
@@ -91,6 +93,7 @@ export default function DetailScreen() {
 
   const handleSave = async () => {
     setSubmitted(true);
+    setDetailError('');
     const e = validateMovieForm(form);
     setErrors(e);
     if (Object.keys(e).length > 0) return;
@@ -101,11 +104,7 @@ export default function DetailScreen() {
       setEditing(false);
       setSubmitted(false);
     } catch (err: any) {
-      if (Platform.OS === 'web') {
-        window.alert(err.message || 'Failed to update movie');
-      } else {
-        Alert.alert('Error', err.message || 'Failed to update movie');
-      }
+      setDetailError(err.message || 'Failed to update movie');
     } finally {
       setSaving(false);
     }
@@ -122,40 +121,21 @@ export default function DetailScreen() {
     });
     setErrors({});
     setSubmitted(false);
+    setDetailError('');
     setEditing(false);
   };
 
   const executeDelete = async () => {
+    setDeleting(true);
     try {
       await deleteMovie(movie.id);
+      setDeleteModalVisible(false);
       router.replace('/(protected)/list');
     } catch (err: any) {
-      if (Platform.OS === 'web') {
-        window.alert(err.message || 'Failed to delete movie');
-      } else {
-        Alert.alert('Error', err.message || 'Failed to delete movie');
-      }
-    }
-  };
-
-  const handleDelete = () => {
-    if (Platform.OS === 'web') {
-      if (window.confirm(`Are you sure you want to delete "${movie.title}"?`)) {
-        executeDelete();
-      }
-    } else {
-      Alert.alert(
-        'Delete Movie',
-        `Are you sure you want to delete "${movie.title}"?`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: executeDelete,
-          },
-        ]
-      );
+      setDetailError(err.message || 'Failed to delete movie');
+      setDeleteModalVisible(false);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -188,6 +168,12 @@ export default function DetailScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        {detailError ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{detailError}</Text>
+          </View>
+        ) : null}
+
         {!editing ? (
           /* ── View Mode ── */
           <View style={[styles.card, Shadows3D.card]}>
@@ -256,7 +242,7 @@ export default function DetailScreen() {
               />
               <AppButton
                 title="🗑️ Delete Movie"
-                onPress={handleDelete}
+                onPress={() => setDeleteModalVisible(true)}
                 variant="danger"
                 style={{ marginTop: 10 }}
                 testID="btn-delete"
@@ -343,6 +329,41 @@ export default function DetailScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* ── In-App 3D Confirmation Modal for Screenshot 15 ── */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.dialogCard, Shadows3D.card]}>
+            <View style={styles.deleteIconBadge}>
+              <Text style={{ fontSize: 28 }}>🗑️</Text>
+            </View>
+            <Text style={styles.dialogTitle}>Delete Movie?</Text>
+            <Text style={styles.dialogMessage}>
+              Are you sure you want to delete "{movie.title}"? This film will be permanently removed from your watchlist.
+            </Text>
+            <View style={styles.dialogActions}>
+              <AppButton
+                title="Cancel"
+                onPress={() => setDeleteModalVisible(false)}
+                variant="outline"
+                style={styles.dialogBtn}
+              />
+              <AppButton
+                title="Delete"
+                onPress={executeDelete}
+                loading={deleting}
+                variant="danger"
+                style={styles.dialogBtn}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -363,6 +384,8 @@ const styles = StyleSheet.create({
   backText: { color: Colors.primary, fontSize: 15, fontWeight: '700' },
   headerTitle: { fontSize: 17, fontWeight: '800', color: Colors.text },
   content: { padding: 18, paddingBottom: 48 },
+  errorBox: { backgroundColor: '#FEE2E2', borderRadius: 10, padding: 12, marginBottom: 14, borderWidth: 1, borderColor: '#FCA5A5' },
+  errorText: { color: Colors.danger, fontWeight: '600', textAlign: 'center' },
   card: {
     backgroundColor: Colors.card,
     borderRadius: 18,
@@ -417,4 +440,53 @@ const styles = StyleSheet.create({
   editActions: { marginTop: 12 },
   notFound: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   notFoundText: { fontSize: 18, color: Colors.textMuted, fontWeight: '600' },
+
+  /* In-app Modal Styles */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  dialogCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  deleteIconBadge: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FEE2E2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dialogTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  dialogMessage: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  dialogActions: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  dialogBtn: {
+    flex: 1,
+  },
 });
