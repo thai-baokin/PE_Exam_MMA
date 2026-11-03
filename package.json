@@ -39,11 +39,18 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@expo/metro-config": "~0.18.11",
     "@react-native/gradle-plugin": "0.74.87",
     "@types/node": "^20.0.0",
     "@types/react": "~18.2.79",
     "babel-preset-expo": "~11.0.6",
     "docx": "^9.15.1",
+    "metro": "~0.80.8",
+    "metro-config": "~0.80.8",
+    "metro-core": "~0.80.8",
+    "metro-resolver": "~0.80.8",
+    "metro-runtime": "~0.80.8",
+    "metro-source-map": "~0.80.8",
     "typescript": "~5.3.3"
   },
   "private": true
