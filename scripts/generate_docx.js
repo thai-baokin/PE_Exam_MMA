@@ -2,13 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = require('docx');
 
-// Get student code from CLI arguments or use default template
-const studentCode = process.argv[2] || 'QE200012';
-const fullName = process.argv[3] || 'Nguyen Van A';
+// Default info for student
+const studentCode = process.argv[2] || 'QE190108';
+const fullName = process.argv[3] || 'Nguyễn Lê Thái Bảo';
 const githubUrl = process.argv[4] || 'https://github.com/thai-baokin/PE_Exam_MMA';
 const expoUrl = process.argv[5] || 'https://expo.dev/accounts/thaibao123/projects/bookshelf-app/builds/008e7777-f14a-42cf-ae2e-1fc088e96213';
 const projectId = process.argv[6] || 'pe-exam123';
-const testEmail = process.argv[7] || `grader.${studentCode.toLowerCase()}@example.com`;
+const testEmail = process.argv[7] || 'grader.qe190108@example.com';
 const testPassword = process.argv[8] || 'Test1234!';
 
 const screenshotCaptions = [

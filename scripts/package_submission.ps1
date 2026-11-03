@@ -1,5 +1,5 @@
 param (
-    [string]$StudentCode = "QE200012"
+    [string]$StudentCode = "QE190108"
 )
 
 $ErrorActionPreference = "Stop"
